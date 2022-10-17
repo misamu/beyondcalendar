@@ -1,5 +1,7 @@
 BeyondCalendar is an Android calendar widget
 
+![IMG_20221017_155534](https://user-images.githubusercontent.com/12541406/196186187-001b0dea-17ae-45dc-8b57-df4d136306e9.jpg)
+
 ## Features
 
 Features include:
@@ -8,7 +10,7 @@ Features include:
 * Add markers to any given day
 
 ## Download
-Aar is available at [builds page](https://github.com/misamu/beyondcalendar/builds).
+Aar is available at [builds page](https://github.com/misamu/beyondcalendar/tree/master/builds).
 
 ## License
 

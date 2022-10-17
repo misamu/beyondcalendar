@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="focus_today_selected">#497a70</color>
+    <color name="focus_today">#699ac0</color>
+    <color name="focus_others">#79AaE0</color>
+
+    <color name="weekday_text_color">#FF929292</color>
+    <color name="day_text_color">#FFFFFF</color>
+    <color name="day_text_selected_color">#fedb34</color>
+    <color name="day_text_today_color">#00FF00</color>
+    <color name="day_text_today_selected_color">#885733</color>
+
+    <color name="day_ripple_color">#FF929292</color>
+    <color name="day_circle_color">#FF929292</color>
+    <color name="day_today_circle_color">#fedb34</color>
+    <color name="day_selected_text_color">#ffffff</color>
+    <color name="day_today_text_color">#fed200</color>
+    <color name="day_selected_today_text_color">#935f34</color>
+    <color name="day_dot_color">#885733</color>
+    <color name="day_selected_dot_color">#885733</color>
+    <color name="day_today_dot_color">#885733</color>
+    <color name="day_selected_today_dot_color">#885733</color>
+</resources>

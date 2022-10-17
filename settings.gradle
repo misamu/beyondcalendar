@@ -1,0 +1,2 @@
+include 'beyondcalendar'
+rootProject.name = "module-android-beyondcalendar"

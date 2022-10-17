@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BeyondCalendar">
+        <attr name="weekdayTextSize" format="dimension" />
+        <attr name="weekdayTextColor" format="color" />
+        <attr name="dayTextSize" format="dimension" />
+        <attr name="dayTextColor" format="color" />
+        <attr name="dayTextSelectedColor" format="color" />
+        <attr name="dayTextTodayColor" format="color" />
+        <attr name="dayTextTodaySelectedColor" format="color" />
+        <attr name="selectionColor" format="reference|color" />
+        <attr name="accentColor" format="reference|color" />
+        <attr name="firstDayOfWeek" format="integer" />
+        <attr name="calendarDateFrom" format="string" />
+        <attr name="calendarDateTo" format="string" />
+    </declare-styleable>
+</resources>

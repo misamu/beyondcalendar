@@ -1,0 +1,3 @@
+<resources>
+    <string name="month_view_tag_name" translatable="false">beyondcalendar:monthview:%1$d</string>
+</resources>

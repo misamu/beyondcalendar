@@ -1,4 +1,4 @@
-BeyondCalendar is an Android calendar widget
+BeyondCalendar is an Android calendar library
 
 ![IMG_20221017_155534](https://user-images.githubusercontent.com/12541406/196186187-001b0dea-17ae-45dc-8b57-df4d136306e9.jpg)
 
@@ -11,6 +11,41 @@ Features include:
 
 ## Download
 Aar is available at [builds page](https://github.com/misamu/beyondcalendar/tree/master/builds).
+
+## Example
+
+### layout
+```
+<app.climbeyond.beyondcalendar.BeyondCalendar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/calendar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    app:firstDayOfWeek="1"
+    app:weekdayTextSize="18sp"
+    app:weekdayTextColor="@color/weekday_text_color"
+    app:dayTextSize="16sp"
+    app:dayTextColor="@color/day_text_color"
+    app:dayTextSelectedColor="@color/day_text_selected_color"
+    app:dayTextTodayColor="@color/day_text_today_color"
+    app:dayTextTodaySelectedColor="@color/day_text_today_selected_color"
+    app:selectionColor="@drawable/bc_state_selected" />
+```
+
+### Code
+```
+viewBinding.calendar.onMonthSelected = { date: ZonedDateTime, view: MonthLayout ->
+    view.setAccents(
+        ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()),
+        mutableListOf(DotAccent(ResourcesCompat.getColor(resources, android.R.color.holo_red_light, theme))))
+}
+
+viewBinding.calendar.onDateSelected = { date ->
+    // Trigger events on date select
+}
+```
 
 ## License
 

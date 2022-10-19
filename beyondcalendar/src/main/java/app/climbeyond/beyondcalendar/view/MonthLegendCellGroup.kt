@@ -7,7 +7,7 @@ import java.time.DayOfWeek
 import java.util.*
 
 @SuppressLint("ViewConstructor")
-class MonthHeaderCellGroup(context: Context, settings: BeyondCalendarSettings) :
+class MonthLegendCellGroup(context: Context, settings: BeyondCalendarSettings) :
         CellGroup(context, settings) {
 
     companion object {
@@ -41,7 +41,7 @@ class MonthHeaderCellGroup(context: Context, settings: BeyondCalendarSettings) :
     private fun populateViews() {
         // add WeekDayViews in 7x1 grid
         getPermutation(dayOfWeekOffset).forEach { weekDay ->
-            addView(MonthHeaderCellView(context, settings, weekDay))
+            addView(MonthLegendCellView(context, settings, weekDay))
         }
     }
 

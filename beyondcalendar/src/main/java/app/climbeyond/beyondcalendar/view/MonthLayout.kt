@@ -17,14 +17,14 @@ class MonthLayout(context: Context, settings: BeyondCalendarSettings,
 
     internal var onDateSelected: ((date: ZonedDateTime) -> Unit)? = null
 
-    private val monthHeaderCellGroup = MonthHeaderCellGroup(context, settings)
+    private val monthLegendCellGroup = MonthLegendCellGroup(context, settings)
     private val monthBodyCellGroup = MonthBodyCellGroup(context, settings, month, selectedDateInit).apply {
         onDateSelected = { date -> this@MonthLayout.onDateSelected?.invoke(date) }
     }
 
     init {
         orientation = VERTICAL
-        addView(monthHeaderCellGroup, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        addView(monthLegendCellGroup, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT))
         addView(monthBodyCellGroup, LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT))

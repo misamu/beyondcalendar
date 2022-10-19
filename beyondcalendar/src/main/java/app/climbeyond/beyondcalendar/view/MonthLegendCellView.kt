@@ -10,7 +10,7 @@ import java.time.format.TextStyle
 import java.util.*
 
 @SuppressLint("ViewConstructor")
-class MonthHeaderCellView(context: Context, settings: BeyondCalendarSettings,
+class MonthLegendCellView(context: Context, settings: BeyondCalendarSettings,
         private var weekday: DayOfWeek) :
         CellView(context, settings) {
 

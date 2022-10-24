@@ -8,21 +8,60 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.Typeface
 import java.time.DayOfWeek
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
-class BeyondCalendarSettings(private val context: Context) {
+class BeyondCalendarSettings(private val context: Context, val beyondCalendar: BeyondCalendar) {
 
-    val density = context.resources.displayMetrics.density
-    val weekdayView = WeekdayView()
-    val dayView = DayView()
+    internal val density = context.resources.displayMetrics.density
+    internal val calendarHeader = CalendarHeader()
+    internal val weekdayView = WeekdayView()
+    internal val dayView = DayView()
 
     var timeZone: TimeZone = TimeZone.getDefault()
+        set(value) {
+            field = value
+            beyondCalendar.onSettingsChange()
+        }
+
     val timeZoneId: ZoneId
         get() = timeZone.toZoneId()
+
     var locale: Locale = Locale.getDefault()
+
     var firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY
+        set(value) {
+            field = value
+            beyondCalendar.onSettingsChange()
+        }
+
     val dayOfWeekOffset: Int
         get() = DayOfWeek.values().indexOf(firstDayOfWeek)
+
+    // Default can scroll back one year
+    var monthFrom: ZonedDateTime = ZonedDateTime.now().minusYears(1).withMonth(1).withDayOfMonth(1)
+        set(value) {
+            field = value
+            beyondCalendar.onSettingsChange()
+        }
+
+    // default can not scroll to future
+    var monthTo: ZonedDateTime = ZonedDateTime.now(timeZoneId)
+        set(value) {
+            field = value
+            beyondCalendar.onSettingsChange()
+        }
+
+    inner class CalendarHeader {
+
+        var visible: Boolean = true
+
+        var bgColor = context.getColorCompat(android.R.color.darker_gray)
+
+        var textColor = context.getColorCompat(android.R.color.white)
+
+        var textSize = context.resources.getDimension(R.dimen.header_text_size)
+    }
 
     inner class WeekdayView {
 

@@ -13,5 +13,9 @@
         <attr name="firstDayOfWeek" format="integer" />
         <attr name="calendarDateFrom" format="string" />
         <attr name="calendarDateTo" format="string" />
+        <attr name="headerVisible" format="boolean" />
+        <attr name="headerBgColor" format="reference|color" />
+        <attr name="headerTextSize" format="dimension" />
+        <attr name="headerTextColor" format="color" />
     </declare-styleable>
 </resources>

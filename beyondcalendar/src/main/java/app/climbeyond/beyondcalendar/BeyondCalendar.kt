@@ -4,90 +4,36 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
-import androidx.viewpager.widget.PagerAdapter
-import androidx.viewpager.widget.ViewPager
-import app.climbeyond.beyondcalendar.view.MonthLayout
+import app.climbeyond.beyondcalendar.accent.Accent
+import app.climbeyond.beyondcalendar.view.CalendarHeader
+import app.climbeyond.beyondcalendar.view.CalendarPager
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import java.util.*
 import kotlin.math.max
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0, defStyleRes: Int = 0) : ViewPager(context, attrs) {
+        defStyleAttr: Int = 0, defStyleRes: Int = 0) : LinearLayout(context, attrs) {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) :
             this(context, attrs, defStyleAttr, 0)
 
-    private var settings: BeyondCalendarSettings = BeyondCalendarSettings(context)
-    private var selectedPage: Int = 0
+    val settings: BeyondCalendarSettings = BeyondCalendarSettings(context, this)
 
-    private val onPageChangeListener: OnPageChangeListener = object : SimpleOnPageChangeListener() {
-        override fun onPageSelected(position: Int) {
-            selectedPage = position
+    internal val calendarPager: CalendarPager
+    internal var calendarHeader: CalendarHeader? = null
 
-            getMonthViewForPosition(position)?.let { view ->
-                view.setSelectedDate(lastSelectedDate)
-                onMonthSelected?.invoke(getDateForPosition(position), view)
-            }
-        }
-    }
+    var selectedDate: ZonedDateTime
+        internal set
 
-    var lastSelectedDate: ZonedDateTime = ZonedDateTime.now(settings.timeZoneId)
-        private set
-
-    var monthCurrent: ZonedDateTime
-        get() = getDateForPosition(currentItem)
-        set(value) {
-            currentItem = getPositionForDate(value)
-        }
-
-    // Default can scroll back one year
-    var monthFrom: ZonedDateTime = ZonedDateTime.now().minusYears(1).withMonth(1).withDayOfMonth(1)
-        set(value) {
-            field = value
-            adapter?.notifyDataSetChanged()
-        }
-
-    // default can not scroll to future
-    var monthTo: ZonedDateTime = ZonedDateTime.now(settings.timeZoneId)
-        set(value) {
-            field = value
-            adapter?.notifyDataSetChanged()
-        }
-
-    var firstDayOfWeek: DayOfWeek
-        get() = settings.firstDayOfWeek
-        set(value) {
-            settings.firstDayOfWeek = value
-        }
-
-    var timeZone: TimeZone
-        get() = settings.timeZone
-        set(value) {
-            settings.apply {
-                timeZone = value
-            }
-        }
-
-    var locale: Locale
-        get() = settings.locale
-        set(value) {
-            settings.apply {
-                locale = value
-            }
-        }
-
-    var onMonthSelected: ((date: ZonedDateTime, view: MonthLayout) -> Unit)? = null
+    var onMonthSelected: ((date: ZonedDateTime) -> Unit)? = null
     var onDateSelected: ((date: ZonedDateTime) -> Unit)? = null
+    var onHeaderTodayClicked: (() -> Unit)? = null
 
     init {
         val attr = context.obtainStyledAttributes(
@@ -96,17 +42,17 @@ class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
         (0 until attr.indexCount).forEach { i ->
             when (val index = attr.getIndex(i)) {
                 R.styleable.BeyondCalendar_calendarDateFrom -> {
-                    monthFrom = ZonedDateTime.ofInstant(attr.getString(index)?.toLong()?.let {
+                    settings.monthFrom = ZonedDateTime.ofInstant(attr.getString(index)?.toLong()?.let {
                         Instant.ofEpochMilli(it)
-                    }, settings.timeZoneId) ?: monthFrom
+                    }, settings.timeZoneId) ?: settings.monthFrom
                 }
                 R.styleable.BeyondCalendar_calendarDateTo -> {
-                    monthTo = ZonedDateTime.ofInstant(attr.getString(index)?.toLong()?.let {
+                    settings.monthTo = ZonedDateTime.ofInstant(attr.getString(index)?.toLong()?.let {
                         Instant.ofEpochMilli(it)
-                    }, settings.timeZoneId) ?: monthTo
+                    }, settings.timeZoneId) ?: settings.monthTo
                 }
                 R.styleable.BeyondCalendar_weekdayTextSize -> {
-                    setWeekDayRawTextSize(attr.getDimension(index, 0f))
+                    settings.weekdayView.textSize = attr.getDimension(index, 0f)
                 }
                 R.styleable.BeyondCalendar_dayTextSize -> {
                     setDayRawTextSize(attr.getDimension(index, 0f))
@@ -128,8 +74,8 @@ class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
                             resources, R.color.day_text_today_selected_color, context.theme)))
                 }
                 R.styleable.BeyondCalendar_weekdayTextColor -> {
-                    setColorWeekdayText(attr.getColor(index, ResourcesCompat.getColor(
-                            resources, R.color.weekday_text_color, context.theme)))
+                    settings.weekdayView.textColor = attr.getColor(index, ResourcesCompat.getColor(
+                            resources, R.color.weekday_text_color, context.theme))
                 }
                 R.styleable.BeyondCalendar_selectionColor -> {
                     attr.getColorStateList(index)?.let { setColorSelectionBackground(it) }
@@ -138,16 +84,40 @@ class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
                     attr.getColorStateList(index)?.let { setColorAccentDefault(it) }
                 }
                 R.styleable.BeyondCalendar_firstDayOfWeek -> {
-                    firstDayOfWeek = DayOfWeek.values()[attr.getInt(index, 0).coerceIn(0..6)]
+                    settings.firstDayOfWeek = DayOfWeek.values()[attr.getInt(index, 0).coerceIn(0..6)]
+                }
+                R.styleable.BeyondCalendar_headerVisible -> {
+                    settings.calendarHeader.visible = attr.getBoolean(index, true)
+                }
+                R.styleable.BeyondCalendar_headerBgColor -> {
+                    settings.calendarHeader.bgColor = attr.getColor(index, ResourcesCompat.getColor(
+                            resources, android.R.color.darker_gray, context.theme))
+                }
+                R.styleable.BeyondCalendar_headerTextSize -> {
+                    settings.calendarHeader.textSize = attr.getDimension(index,
+                            context.resources.getDimension(R.dimen.header_text_size))
+                }
+                R.styleable.BeyondCalendar_headerTextColor -> {
+                    settings.calendarHeader.textColor = attr.getColor(index, ResourcesCompat.getColor(
+                            resources, android.R.color.white, context.theme))
                 }
             }
         }
         attr.recycle()
 
-        adapter = Adapter()
-        addOnPageChangeListener(onPageChangeListener)
+        orientation = VERTICAL
 
-        currentItem = getPositionForDate(ZonedDateTime.now(settings.timeZoneId))
+        selectedDate = ZonedDateTime.now(settings.timeZoneId)
+
+        // First create pager that is needed in CalendarHeader
+        calendarPager = CalendarPager(this, context, attrs)
+
+        if (settings.calendarHeader.visible) {
+            calendarHeader = CalendarHeader(this, context)
+            addView(calendarHeader, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        }
+
+        addView(calendarPager, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -169,26 +139,13 @@ class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
         super.onMeasure(widthMeasureSpec, heightSpec)
     }
 
-    private fun getDateForPosition(position: Int): ZonedDateTime =
-        monthFrom.plusMonths(position.toLong())
-
-    private fun getPositionForDate(date: ZonedDateTime): Int =
-        ChronoUnit.MONTHS.between(monthFrom, date).toInt()
-
-    private fun getMonthViewForPosition(position: Int): MonthLayout? = findViewWithTag(
-            context.getString(R.string.month_view_tag_name, position)) as? MonthLayout
-
-    fun getCurrentMonthView(): MonthLayout? {
-        return getMonthViewForPosition(currentItem)
-    }
-
-    fun setSelectedDate(date: ZonedDateTime) {
-        getMonthViewForPosition(getPositionForDate(date))?.setSelectedDate(date)
+    fun setAccents(month: ZonedDateTime, accents: Map<ZonedDateTime, Collection<Accent>>) {
+        calendarPager.getMonthView(month)?.setAccents(accents)
     }
 
     fun setWeekDayTextSize(unit: Int, size: Float) {
-        setWeekDayRawTextSize(
-                TypedValue.applyDimension(unit, size, context.resources.displayMetrics))
+        settings.weekdayView.textSize = TypedValue.applyDimension(
+                unit, size, context.resources.displayMetrics)
     }
 
     fun setDayTextSize(unit: Int, size: Float) {
@@ -232,48 +189,27 @@ class BeyondCalendar(context: Context, attrs: AttributeSet? = null,
         settings.dayView.setTextFilterColor(weekday, color)
     }
 
-    /**
-     * Weekday text setters
-     */
-    fun setColorWeekdayText(color: Int) {
-        settings.weekdayView.textColor = color
+    internal fun onMonthSelected(date: ZonedDateTime) {
+        calendarHeader?.updateHeaderText()
+        onMonthSelected?.invoke(date)
     }
 
-    fun setColorWeekdayFilter(weekday: DayOfWeek, color: Int) {
-        settings.weekdayView.setTextFilterColor(weekday, color)
+    internal fun onDateSelected(date: ZonedDateTime) {
+        onDateSelected?.invoke(date)
     }
 
-    private fun setWeekDayRawTextSize(size: Float) {
-        settings.weekdayView.textSize = size
+    internal fun onHeaderTodayClicked() {
+        selectedDate = ZonedDateTime.now()
+        calendarPager.updateSelectedDate()
+
+        onHeaderTodayClicked?.invoke()
     }
 
-    private inner class Adapter : PagerAdapter() {
-
-        override fun instantiateItem(container: ViewGroup, position: Int): View {
-            val view =
-                MonthLayout(context, settings, getDateForPosition(position), lastSelectedDate).apply {
-                    tag = context.getString(R.string.month_view_tag_name, position)
-                    onDateSelected = { date ->
-                        lastSelectedDate = date
-                        this@BeyondCalendar.onDateSelected?.invoke(date)
-                    }
-                }
-            container.addView(view, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT))
-
-            if (position == selectedPage) {
-                onMonthSelected?.invoke(getDateForPosition(position), view)
-            }
-
-            return view
+    internal fun onSettingsChange() {
+        // Notify settings change only after calendar is visible, fully initialized and thus
+        // BeyondCalendarSettings initialization will not trigger data set change
+        if (isShown) {
+            calendarPager.adapter?.notifyDataSetChanged()
         }
-
-        override fun destroyItem(container: ViewGroup, position: Int, view: Any) {
-            (view as? View)?.let { container.removeView(it) }
-        }
-
-        override fun isViewFromObject(view: View, obj: Any): Boolean = view === obj
-
-        override fun getCount(): Int = max(0, ChronoUnit.MONTHS.between(monthFrom, monthTo).toInt() + 1)
     }
 }

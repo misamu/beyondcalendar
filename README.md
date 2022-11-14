@@ -1,10 +1,11 @@
 BeyondCalendar is an Android calendar library
 
-![IMG_20221017_155534](https://user-images.githubusercontent.com/12541406/196186187-001b0dea-17ae-45dc-8b57-df4d136306e9.jpg)
+![calendar](https://user-images.githubusercontent.com/12541406/201667569-b69f3a40-c9bf-4d52-90d6-3a41e1372025.jpg)
 
 ## Features
 
 Features include:
+* Header showing current year and month
 * Show one month in view
 * Swipe to change month between defined month interval
 * Add markers to any given day
@@ -19,10 +20,13 @@ Aar is available at [builds page](https://github.com/misamu/beyondcalendar/tree/
 <app.climbeyond.beyondcalendar.BeyondCalendar
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/calendar"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black"
+    app:headerVisible="true"
+    app:headerBgColor="@android:color/darker_gray"
+    app:headerTextColor="@android:color/white"
+    app:headerTextSize="8sp"
     app:firstDayOfWeek="1"
     app:weekdayTextSize="18sp"
     app:weekdayTextColor="@color/weekday_text_color"
@@ -44,6 +48,10 @@ viewBinding.calendar.onMonthSelected = { date: ZonedDateTime, view: MonthLayout 
 
 viewBinding.calendar.onDateSelected = { date ->
     // Trigger events on date select
+}
+
+calendar.onHeaderTodayClicked = {
+    // Headers change to today clicked
 }
 ```
 
